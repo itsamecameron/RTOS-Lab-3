@@ -137,7 +137,7 @@ static  void  App_TaskStart (void *p_arg)
             (void *)0,
             (OS_OPT)(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
             (OS_ERR *)&err);
-    
+
     //Create LED blinking function
     OSTaskCreate((OS_TCB *)&led_TCB,
             (CPU_CHAR *)"led",
@@ -155,7 +155,7 @@ static  void  App_TaskStart (void *p_arg)
     App_ObjCreate();                                            /* Create Application kernel objects                    */
 
 
-    
+
 }
 
 /*
@@ -202,16 +202,14 @@ static  void  App_ObjCreate (void)
 
 static void prime (void *p_arg)
 {
-    OS_ERR err;
     CPU_INT08U primeflag;
-    
     while (DEF_TRUE) {                                          /* Task body, always written as an infinite loop.       */
         for(i=2; i<0x100; i++)                                  // Cycle through integers 0-255
         {
             primeflag=1;                                        // i assumed to be prime until proven otherwise
             for(j=2; j<i; j++)                                  // Test to see if i is prime
             {
-                if(i%j==0) 
+                if(i%j==0)
                 {
                     primeflag=0;
                     break;
@@ -219,16 +217,16 @@ static void prime (void *p_arg)
             }
             if(primeflag==1)                                    // if number was prime, light LEDs
             {
-
-                
+                // post task semaphore to LED task and pend for
             }
         }
     }
     return;
-    
+
 }
 static void led (void *p_arg)
 {
+    OS_ERR err;
     for(k=i, l=1; l<8; l++)                         // Test each bit and light appropriate LEDs
     {
         LED_Off(l);
@@ -239,8 +237,3 @@ static void led (void *p_arg)
     OSTimeDlyHMSM(0u, 0u, 0u, 1u, OS_OPT_TIME_HMSM_STRICT, &err);
     return;
 }
-
-
-
-
-
