@@ -30,7 +30,7 @@ static  OS_TCB    led_TCB;
 static  CPU_STK   prime_stk[128];
 static  CPU_STK   led_stk[128];
 
-CPU_INT08U prime;
+CPU_INT08U primeOut;
 
 
 //Global Variables
@@ -206,12 +206,12 @@ static void prime (void *p_arg)
     CPU_TS ts;
     CPU_INT08U primeflag, j;
     while (DEF_TRUE) {                                          /* Task body, always written as an infinite loop.       */
-        for(prime=2; prime<0x100; prime++)                                  // Cycle through integers 0-255
+        for(primeOut=2; primeOut<0x100; primeOut++)                                  // Cycle through integers 0-255
         {
             primeflag=1;                                        // i assumed to be prime until proven otherwise
-            for(j=2; j<prime; j++)                                  // Test to see if i is prime
+            for(j=2; j<primeOut; j++)                                  // Test to see if i is prime
             {
-                if(prime%j==0)
+                if(primeOut%j==0)
                 {
                     primeflag=0;
                     break;
@@ -232,8 +232,9 @@ static void led (void *p_arg)
 {
 
     OS_ERR err;
+    CPU_TS ts;
     CPU_INT08U k, l;
-    for(k=prime, l=1; l<8; l++)                         // Test each bit and light appropriate LEDs
+    for(k=primeOut, l=1; l<8; l++)                         // Test each bit and light appropriate LEDs
     {
         LED_Off(l);
         if(k&1u) {LED_On(l);}
