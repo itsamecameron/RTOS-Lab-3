@@ -226,10 +226,10 @@ static void prime (void *p_arg)
           {
               // post task semaphore to LED task and pend for
               OSMutexPost(&PrimesMutex, OS_OPT_POST_NONE, &err);
+              OSTaskSemPost(&led_TCB, OS_OPT_POST_NONE, &err);
           }
+          OSTaskSemPend(1000, OS_OPT_PEND_BLOCKING, &ts, &err);
       }
-      OSTaskSemPost(&led_TCB, OS_OPT_POST_NONE, &err);
-      OSTaskSemPend(1000, OS_OPT_PEND_BLOCKING, &ts, &err);
     }
     return;
 }
