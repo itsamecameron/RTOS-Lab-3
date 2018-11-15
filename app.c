@@ -227,7 +227,7 @@ static void prime (void *p_arg)
               // post task semaphore to LED task and pend for
               OSMutexPost(&PrimesMutex, OS_OPT_POST_NONE, &err);
               OSTaskSemPost(&led_TCB, OS_OPT_POST_NONE, &err);
-              OSTaskSemPend(1000, OS_OPT_PEND_BLOCKING, &ts, &err);
+              OSTaskSemPend(0, OS_OPT_PEND_NON_BLOCKING, &ts, &err);
           }
       }
     }
@@ -241,7 +241,7 @@ static void led (void *p_arg)
     CPU_TS ts;
     CPU_INT08U k, l;
     while (DEF_TRUE) {
-      OSMutexPend(&PrimesMutex, 100, OS_OPT_PEND_BLOCKING, &ts, &err);
+      OSMutexPend(&PrimesMutex, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
       for(k=primeOut, l=1; l<8; l++)                         // Test each bit and light appropriate LEDs
       {
           LED_Off(l);
@@ -249,7 +249,7 @@ static void led (void *p_arg)
           k >>= 1;
       }
       //Keep the lights on
-      OSTimeDlyHMSM(0u, 0u, 0u, 1u, OS_OPT_TIME_HMSM_STRICT, &err);
+      OSTimeDlyHMSM(0u, 2u, 0u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);
       OSMutexPost(&PrimesMutex, OS_OPT_POST_NONE, &err);
       OSTaskSemPost(&prime_TCB, OS_OPT_POST_NONE, &err);
     }
