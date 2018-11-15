@@ -210,9 +210,9 @@ static void prime (void *p_arg)
     CPU_TS ts;
     CPU_INT08U primeflag, j;
     while (DEF_TRUE) {                                          /* Task body, always written as an infinite loop.       */
-      OSMutexPend(&PrimesMutex, 100, OS_OPT_PEND_BLOCKING, &ts, &err);
       for(primeOut=2; primeOut<0x100; primeOut++)                                  // Cycle through integers 0-255
       {
+          OSMutexPend(&PrimesMutex, 100, OS_OPT_PEND_BLOCKING, &ts, &err);
           primeflag=1;                                        // i assumed to be prime until proven otherwise
           for(j=2; j<primeOut; j++)                                  // Test to see if i is prime
           {
