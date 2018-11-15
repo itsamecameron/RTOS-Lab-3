@@ -30,7 +30,8 @@ static  OS_TCB    led_TCB;
 static  CPU_STK   prime_stk[128];
 static  CPU_STK   led_stk[128];
 
-CPU_INT08U primeOut;
+CPU_INT08U primeOut = 0;
+CPU_INT08U count = 2;
 OS_MUTEX PrimesMutex;
 
 
@@ -147,7 +148,7 @@ static  void  App_TaskStart (void *p_arg)
             (CPU_CHAR *)"led",
             (OS_TASK_PTR)led,
             (void *)0,
-            (OS_PRIO )2,
+            (OS_PRIO )3,
             (CPU_STK *)&led_stk[0],
             (CPU_STK_SIZE)0,
             (CPU_STK_SIZE)128,
@@ -208,15 +209,19 @@ static void prime (void *p_arg)
 {
     OS_ERR err;
     CPU_TS ts;
-    CPU_INT08U primeflag, j;
-    while (DEF_TRUE) {                                          /* Task body, always written as an infinite loop.       */
-      OSMutexPend(&PrimesMutex, 100, OS_OPT_PEND_BLOCKING, &ts, &err);
-      for(primeOut=2; primeOut<0x100; primeOut++)                                  // Cycle through integers 0-255
+    CPU_INT08U primeflag = 0;
+    CPU_INT08U i = 0;
+    CPU_INT08U j = 0;
+
+    while (DEF_TRUE) {   
+      OSTaskSemPend(0, OS_OPT_PEND_BLOCKING, &ts, &err);
+      /* Task body, always written as an infinite loop.       */
+      for(i = count; 1<0x100; i++)                                  // Cycle through integers 0-255
       {
           primeflag=1;                                        // i assumed to be prime until proven otherwise
-          for(j=2; j<primeOut; j++)                                  // Test to see if i is prime
+          for(j=2; j<i; j++)                                  // Test to see if i is prime
           {
-              if(primeOut%j==0)
+              if(i%j==0)
               {
                   primeflag=0;
                   break;
@@ -224,10 +229,11 @@ static void prime (void *p_arg)
           }
           if(primeflag==1)                                    // if number was prime, light LEDs
           {
+              count = i + 1;
+              primeflag = 1;
+              primeOut = i;
               // post task semaphore to LED task and pend for
-              OSMutexPost(&PrimesMutex, OS_OPT_POST_NONE, &err);
               OSTaskSemPost(&led_TCB, OS_OPT_POST_NONE, &err);
-              OSTaskSemPend(0, OS_OPT_PEND_NON_BLOCKING, &ts, &err);
           }
       }
     }
@@ -239,19 +245,16 @@ static void led (void *p_arg)
 
     OS_ERR err;
     CPU_TS ts;
-    CPU_INT08U k, l;
-    while (DEF_TRUE) {
-      OSMutexPend(&PrimesMutex, 0, OS_OPT_PEND_BLOCKING, &ts, &err);
-      for(k=primeOut, l=1; l<8; l++)                         // Test each bit and light appropriate LEDs
-      {
-          LED_Off(l);
-          if(k&1u) {LED_On(l);}
-          k >>= 1;
-      }
-      //Keep the lights on
-      OSTimeDlyHMSM(0u, 2u, 0u, 0u, OS_OPT_TIME_HMSM_STRICT, &err);
-      OSMutexPost(&PrimesMutex, OS_OPT_POST_NONE, &err);
-      OSTaskSemPost(&prime_TCB, OS_OPT_POST_NONE, &err);
+    CPU_INT08U k = 0;
+    CPU_INT08U l = 0;
+    
+    while (DEF_ON) {
+        OSTaskSemPost(&prime_TCB, OS_OPT_POST_NONE, &err);
+        
+
+        //Keep the lights on
+        OSTimeDlyHMSM(0u, 0u, 0u, 1u, OS_OPT_TIME_HMSM_STRICT, &err);        
+        OSTaskSemPend(0, OS_OPT_PEND_BLOCKING, &ts, &err);
     }
     return;
 }
